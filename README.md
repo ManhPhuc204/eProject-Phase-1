@@ -335,7 +335,7 @@ Các image được build và push tự động:
 | Order        | `dockerhub-manhphuc04/order`                 |
 | Api-Gateway  | `dockerhub-manhphuc04/api-gateway`           |
 
-<img width="1892" height="800" alt="image" src="https://github.com/user-attachments/assets/ae11b839-6c0b-43c4-96ac-327008182924" />
+
 
 
 
