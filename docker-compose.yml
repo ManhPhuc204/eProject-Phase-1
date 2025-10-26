@@ -1,0 +1,107 @@
+services:
+  # 🐇 RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+  # 🍃 MongoDB Service
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backend
+
+  # 🌐 API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "3003:3003"
+    depends_on:
+      - auth
+      - product
+      - order
+      - rabbitmq
+    environment:
+      - NODE_ENV=docker
+      - AUTH_SERVICE_URL=http://auth:3000
+      - PRODUCT_SERVICE_URL=http://product:3001
+      - ORDER_SERVICE_URL=http://order:3002
+      - JWT_SECRET=secretkey123
+    networks:
+      - backend
+
+  # 👤 Auth Service
+  auth:
+    build: ./auth
+    container_name: auth
+    ports:
+      - "3000:3000"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - MONGODB_AUTH_URI=mongodb://mongodb:27017/authDB
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - JWT_SECRET=secretkey123
+    networks:
+      - backend
+
+  # 🛒 Product Service
+  product:
+    build: ./product
+    container_name: product
+    ports:
+      - "3001:3001"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - MONGODB_PRODUCT_URI=mongodb://mongodb:27017/productDB
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - JWT_SECRET=secretkey123
+    networks:
+      - backend
+    volumes:
+    - ./product:/app
+  # 📦 Order Service
+  order:
+    build: ./order
+    container_name: order
+    ports:
+      - "3002:3002"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    environment:
+      - MONGODB_ORDER_URI=mongodb://mongodb:27017/orderDB
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - JWT_SECRET=secretkey123
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mongodb_data:
