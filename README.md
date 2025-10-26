@@ -316,11 +316,10 @@ Workflow thực hiện các bước:
   
 ## Github Action
 
-<img width="624" height="273" alt="image" src="https://github.com/user-attachments/assets/f9d130dc-67cb-41cd-8119-cee28b0fa11c" />
 
 ### 🔹 File cấu hình:
 
-`.github/workflows/ci-cd.yml`
+`.github/workflows/CICD.yml`
 
 ---
 
@@ -345,7 +344,7 @@ Các image được build và push tự động:
 EProject-Phase-1/
 ├── .github/
 │   └── workflows/
-│       └── ci-cd.yml          
+│       └── CICD.yml          
 ├── api-gateway/
 │   ├── Dockerfile
 │   ├── index.js
